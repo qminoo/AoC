@@ -1,11 +1,31 @@
+use miette::MietteError;
+
 fn main() {
     let input = include_str!("./input1.txt");
     let output = part1(input);
-    dbg!(output);
+    println!("{:?}", output);
 }
 
-fn part1(input: &str) -> String {
-    "24000".to_string()
+fn part1(input: &str) -> miette::Result<String, MietteError> {
+    let output = input
+        .lines()
+        .map(|line| {
+            let mut it =
+                line.chars().filter_map(|char| {
+                    char.to_digit(10)
+                });
+            let first =
+                it.next().expect("should be a number");
+            match it.last() {
+                Some(num) => format!("{first}{num}"),
+                None => format!("{first}{first}"),
+            }
+            .parse::<u32>()
+            .expect("should be a valid number")
+        })
+        .sum::<u32>();
+
+    Ok(output.to_string())
 }
 
 #[cfg(test)]
@@ -13,8 +33,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
-        let result = part1("TEST CASE GOES HERE");
-        assert_eq!(result, "24000".to_string());
+    fn test_process() -> miette::Result<()> {
+        let input = "1abc2
+pqr3stu8vwx
+a1b2c3d4e5f
+treb7uchet";
+        assert_eq!("142", part1(input)?);
+        Ok(())
     }
 }
